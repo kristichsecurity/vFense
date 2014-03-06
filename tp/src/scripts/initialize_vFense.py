@@ -9,6 +9,8 @@ import subprocess
 from time import sleep
 import logging, logging.config
 
+import settings
+
 import create_indexes as ci
 import nginx_config_creator as ncc
 from vFense.utils.security import generate_pass
@@ -27,32 +29,8 @@ from vFense.plugins.cve.cve_parser import load_up_all_xml_into_db
 from vFense.plugins.cve.bulletin_parser import parse_bulletin_and_updatedb
 from vFense.plugins.cve.get_all_ubuntu_usns import begin_usn_home_page_processing
 
-gettext = lambda s: s
-
-ROOT = '/usr/local'
-ROOT_ETC = os.path.join(ROOT, 'etc/vfense')
-ROOT_BIN = os.path.join(ROOT, 'bin/vfense')
-ROOT_LIB = os.path.join(ROOT, 'lib/vfense')
-ROOT_RUN = '/run/vfense'
-ROOT_LOG = '/var/log/vfense'
-
-logging.config.fileConfig(os.path.join(ROOT_ETC, 'logging.config'))
+logging.config.fileConfig(os.path.join(settings.ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvapi')
-
-RETHINK_PATH = '/usr/share/rethinkdb'
-RETHINK_USER = 'rethinkdb'
-RETHINK_INSTANCES_PATH = '/etc/rethinkdb/instances.d'
-RETHINK_DATA_PATH = '/var/lib/rethinkdb/vFense/data'
-RETHINK_SOURCE_CONF = os.path.join(ROOT_ETC, 'rethinkdb_vFense.conf')
-RETHINK_CONF = '/etc/rethinkdb/instances.d/vFense.conf'
-RETHINK_WEB = '/usr/share/rethinkdb/web'
-RETHINK_PID_FILE = '/var/run/rethinkdb/vFense/pid_file'
-
-TOPPATCH_HOME = '/opt/TopPatch/'
-
-NGINX_CONFIG = '/etc/nginx/sites-available/vFense.conf'
-NGINX_CONFIG_ENABLED = '/etc/nginx/sites-enabled/vFense.conf'
-
 
 if os.getuid() != 0:
     print 'MUST BE ROOT IN ORDER TO RUN'
@@ -116,39 +94,37 @@ ncc.nginx_config_builder(
 
 def initialize_db():
     os.umask(0)
-    if not os.path.exists('/opt/TopPatch/var/tmp'):
-        os.mkdir('/opt/TopPatch/var/tmp')
-    if not os.path.exists(RETHINK_CONF):
+    if not os.path.exists(settings.RETHINK_CONF):
         subprocess.Popen(
             [
                 'ln', '-s',
-                RETHINK_SOURCE_CONF,
-                RETHINK_CONF
+                settings.RETHINK_SOURCE_CONF,
+                settings.RETHINK_CONF
             ],
         )
-    if not os.path.exists('/var/lib/rethinkdb/vFense'):
-        os.makedirs('/var/lib/rethinkdb/vFense')
+    if not os.path.exists(settings.RETHINK_VFENSE_ROOT):
+        os.makedirs(settings.RETHINK_VFENSE_ROOT)
+        os.makedirs(settings.RETHINK_VFENSE_DATA)
+
         subprocess.Popen(
             [
-                'chown', '-R', 'rethinkdb.rethinkdb', '/var/lib/rethinkdb/vFense'
+                'chown', '-R', 'rethinkdb.rethinkdb', settings.RETHINK_VFENSE_ROOT
             ],
         )
-    if os.path.exists(NGINX_CONFIG) and not os.path.exists(NGINX_CONFIG_ENABLED):
+    if os.path.exists(settings.NGINX_CONFIG) and not os.path.exists(settings.NGINX_CONFIG_ENABLED):
         subprocess.Popen(
             [
                 'ln', '-s',
-                NGINX_CONFIG,
-                NGINX_CONFIG_ENABLED
+                settings.NGINX_CONFIG,
+                settings.NGINX_CONFIG_ENABLED
             ],
         )
-    if not os.path.exists('/opt/TopPatch/var/log'):
-        os.mkdir('/opt/TopPatch/var/log')
+    if not os.path.exists(settings.ROOT_LOG):
+        os.mkdir(settings.ROOT_LOG)
     if not os.path.exists('/opt/TopPatch/var/scheduler'):
         os.mkdir('/opt/TopPatch/var/scheduler')
     if not os.path.exists('/opt/TopPatch/var/packages'):
         os.mkdir('/opt/TopPatch/var/packages')
-    if not os.path.exists('/opt/TopPatch/logs'):
-        os.mkdir('/opt/TopPatch/logs')
     if not os.path.exists('/opt/TopPatch/var/packages/tmp'):
         os.mkdir('/opt/TopPatch/var/packages/tmp', 0773)
     if not os.path.exists('/opt/TopPatch/tp/src/plugins/cve/data/xls'):
@@ -176,7 +152,7 @@ def initialize_db():
             [
                 'patch', '-N',
                 '/usr/local/lib/python2.7/dist-packages/apscheduler/scheduler.py',
-                '<', 'scheduler.patch'
+                '<', os.path.join(settings.ROOT_SRC_PATCHES, 'scheduler.patch')
             ],
         )
     try:
@@ -224,9 +200,11 @@ def initialize_db():
             print "Updating CVE's..."
             load_up_all_xml_into_db()
             print "Done Updating CVE's..."
+
             print "Updating Microsoft Security Bulletin Ids..."
             parse_bulletin_and_updatedb()
             print "Done Updating Microsoft Security Bulletin Ids..."
+
             print "Updating Ubuntu Security Bulletin Ids...( This can take a couple of minutes )"
             begin_usn_home_page_processing(full_parse=True)
             print "Done Updating Ubuntu Security Bulletin Ids..."
@@ -259,7 +237,7 @@ def initialize_db():
 
 
 def clean_database(connected):
-    os.chdir(RETHINK_PATH)
+    os.chdir(settings.RETHINK_PATH)
     completed = True
     rql_msg = None
     msg = None
@@ -267,7 +245,7 @@ def clean_database(connected):
         rethink_stop = subprocess.Popen(['service', 'rethinkdb','stop'])
         rql_msg = 'Rethink stopped successfully\n'
     try:
-        shutil.rmtree(RETHINK_DATA_PATH)
+        shutil.rmtree(settings.RETHINK_DATA_PATH)
         msg = 'Rethink instances.d directory removed and cleaned'
     except Exception as e:
         msg = 'Rethink instances.d directory could not be removed'
@@ -296,7 +274,14 @@ if __name__ == '__main__':
         print 'vFense environment has been succesfully initialized\n'
         subprocess.Popen(
             [
-                'chown', '-R', 'toppatch.toppatch', '/opt/TopPatch'
+                'chown', '-R', 'toppatch.toppatch',
+                settings.ROOT_LOG,
+                settings.ROOT_ETC,
+                settings.ROOT_TMP,
+                settings.ROOT_SRC,
+                settings.ROOT_RUN,
+                settings.ROOT_LIB,
+                settings.ROOT_BIN
             ],
         )
 

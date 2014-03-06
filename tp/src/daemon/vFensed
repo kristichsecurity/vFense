@@ -10,19 +10,12 @@ import signal
 import subprocess
 import logging, logging.config
 from vFense.db.client import db_connect
-gettext = lambda s: s
 
-ROOT = '/usr/local'
-ROOT_ETC = os.path.join(ROOT, 'etc/vfense')
-ROOT_BIN = os.path.join(ROOT, 'bin/vfense')
-ROOT_LIB = os.path.join(ROOT, 'lib/vfense')
-ROOT_RUN = '/run/vfense'
-ROOT_LOG = '/var/log/vfense'
+import settings
 
-logging.config.fileConfig(os.path.join(ROOT_ETC, 'logging.config'))
+logging.config.fileConfig(os.path.join(settings.ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvapi')
 
-PID_DIR = ROOT_RUN
 PIDS =[]
 SERVICES =[]
 ALLSERVICES =[]
@@ -41,15 +34,15 @@ RQ_WORKER_QUEUES = (
 RQ_PID_FILES = []
 
 for queue in RQ_WORKER_QUEUES:
-    pid_file = os.path.join(ROOT_RUN, 'RQW_PID_%s.pid' % (queue))
+    pid_file = os.path.join(settings.ROOT_RUN, 'RQW_PID_%s.pid' % (queue))
     PIDS.append((pid_file, queue))
     RQ_PID_FILES.append(pid_file)
 
 #################################################################
 RVL_PORTS = range(9020, 9030)
-RVLISTENER = os.path.join(ROOT_LIB, 'src/vFense_listener.py')
+RVLISTENER = os.path.join(settings.ROOT_SRC, 'vFense_listener.py')
 for port in RVL_PORTS:
-    pid_file = os.path.join(ROOT_RUN, 'RVL_PID_%s.pid' % (str(port)))
+    pid_file = os.path.join(settings.ROOT_RUN, 'RVL_PID_%s.pid' % (str(port)))
     rvl = 'RvListener port %s' % (str(port))
     PIDS.append((pid_file, rvl))
     RVLSERVICES.append((RVLISTENER, pid_file, rvl, port))
@@ -57,28 +50,24 @@ for port in RVL_PORTS:
 
 ##################################################################
 RVW_PORTS = range(9060, 9061)
-RVWEB = os.path.join(ROOT_LIB, 'src/vFense_web.py')
+RVWEB = os.path.join(settings.ROOT_SRC, 'vFense_web.py')
 for port in RVW_PORTS:
-    pid_file = os.path.join(ROOT_RUN, 'RVW_PID_%s.pid' % (str(port)))
+    pid_file = os.path.join(settings.ROOT_RUN, 'RVW_PID_%s.pid' % (str(port)))
     rvw = 'RvWeb port %s' % (str(port))
     PIDS.append((pid_file, rvw))
     RVWSERVICES.append((RVWEB, pid_file, rvw, port))
     ALLSERVICES.append((RVWEB, pid_file, rvw, port))
 
 ##################################################################
-TOPPATCH_HOME = '/opt/TopPatch/'
 PROGRAM = 'python'
-PIDFILE = os.path.join(ROOT_RUN, 'vfense.pid')
-RVSCHEDULER_PIDFILE = os.path.join(ROOT_RUN, 'rvscheduler-9002.pid')
+PIDFILE = os.path.join(settings.ROOT_RUN, 'vfense.pid')
+RVSCHEDULER_PIDFILE = os.path.join(settings.ROOT_RUN, 'rvscheduler-9002.pid')
 
 RECEIVER_DIR = '/opt/TopPatch/tp/src/receiver'
 PATH = '/opt/TopPatch/tp/'
 RVSCHEDULER='src/scheduler/rvscheduler.py'
 
 PIDS.append((RVSCHEDULER_PIDFILE, 'RvScheduler'))
-
-if not os.path.exists(ROOT_LOG):
-    os.mkdir(ROOT_LOG)
 
 SERVICES.append((RVSCHEDULER, RVSCHEDULER_PIDFILE, 'RvScheduler'))
 ALLSERVICES.append((RVSCHEDULER, RVSCHEDULER_PIDFILE, 'RvScheduler'))
@@ -101,7 +90,7 @@ def rqworker_starter():
     completed = True
     for queue in RQ_WORKER_QUEUES:
         os.chdir(RECEIVER_DIR)
-        pid_file = '%sRQW_PID_%s.pid' % (PID_DIR, queue)
+        pid_file = os.path.join(settings.ROOT_RUN, 'RQW_PID_%s.pid' % (queue))
         rqw_settings = 'rqworker_%s_settings' % (queue)
         rqw = 'RqWorker Queue %s' % (queue)
         rqworker_start = (
@@ -135,7 +124,7 @@ def rqworker_stop():
     completed = True
 
     for queue in RQ_WORKER_QUEUES:
-        pid_file = os.path.join(ROOT_RUN, 'RQW_PID_%s.pid' % (queue))
+        pid_file = os.path.join(settings.ROOT_RUN, 'RQW_PID_%s.pid' % (queue))
         rqw = 'RqWorker Queue %s' % (queue)
         if os.path.exists(pid_file):
             pid_exists = open(pid_file, 'r').read()
