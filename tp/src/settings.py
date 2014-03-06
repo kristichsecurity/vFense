@@ -6,6 +6,7 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 PROGRAM = 'python'
 PRODUCT = 'vFense'
+AGENT_PRODUCT = 'vFense Agent'
 RUNASUSER = 'toppatch'
 
 ###########################################
@@ -38,6 +39,13 @@ ROOT_PKG_CACHE = '/var/cache/%s/packages' % (PRODUCT)
 ROOT_PLUGINS_CVE_XLS = os.path.join(ROOT_PLUGINS, 'cve/data/xls')
 ROOT_PLUGINS_CVE_XML = os.path.join(ROOT_PLUGINS, 'cve/data/xml')
 ROOT_PLUGINS_CVE_UBUNTU = os.path.join(ROOT_PLUGINS, 'cve/data/html/ubuntu')
+
+############################################
+# Agent settings
+############################################
+AGENT_PIDFILE = os.path.join(ROOT_RUN, 'TopPatchAgent.pid')
+AGENT_SRC = os.path.join(ROOT_SRC, 'agent')
+AGENT_BIN = os.path.join(AGENT_SRC, 'agent.py')
 
 ############################################
 # TMP

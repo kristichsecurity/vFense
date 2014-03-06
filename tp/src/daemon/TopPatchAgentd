@@ -7,10 +7,7 @@ import shlex
 import signal
 import subprocess
 
-PIDFILE = '/tmp/TopPatchAgent.pid'
-PATH='/opt/TopPatch/agent/'
-TOPPATCHAGENT = 'src/agent.py'
-PROGRAM = 'python'
+import settings
 
 def run(program, *args):
     try:
@@ -19,7 +16,7 @@ def run(program, *args):
             os.execvp(program, (program,) + args)
     except OSError, e:
         sys.stderr.write("fork failed %d (%s)\n" % (e.errno, e.strerror))
-        logger.warning("fork failed %d (%s)\n" % (e.errno, e.strerror))    
+        logger.warning("fork failed %d (%s)\n" % (e.errno, e.strerror))
         sys.exit(1)
     return pid
 
@@ -30,8 +27,8 @@ def handler(signum, frame):
 
 def TopPatchAgent_start():
     pids = []
-    if os.path.isfile(PIDFILE):
-        pf = file(PIDFILE, 'r')
+    if os.path.isfile(settings.AGENT_PID):
+        pf = file(settings.AGENT_PID, 'r')
         pids = (pf.read().strip()[1:-1])
 	print pids
         pid_no = pids.split(', ')
@@ -41,48 +38,48 @@ def TopPatchAgent_start():
             if pid:
                 count = count + 1
         if count == len(pid_no):
-            message = "TopPatch Agent is already running. Pidfile: '%s'\n"
-            sys.stderr.write(message % PIDFILE)
+            message = "%s is already running. Pidfile: '%s'\n"
+            sys.stderr.write(message % (settings.AGENT_PRODUCT, settings.AGENT_PID))
 
             sys.exit(1)
     else:
 	os.chdir(PATH)
-        print 'TopPatch Agent is starting. Please wait....'
-        pid = run(PROGRAM, TOPPATCHAGENT)
+        print '%s is starting. Please wait....' % (settings.AGENT_PRODUCT)
+        pid = run(settings.PROGRAM, settings.AGENT_BIN)
         pids.append(pid)
         time.sleep(1)
-        file(PIDFILE, 'w+').write("%s\n" % pids)
+        file(settings.AGENT_PID, 'w+').write("%s\n" % pids)
         signal.signal(signal.SIGINT, handler)
         time.sleep(5)
-        print 'TopPatch Agent has been started. Enjoy !!!'
+        print '%s has been started. Enjoy !!!' % (settings.AGENT_PRODUCT)
 
 
 def TopPatchAgent_stop():
-    if not os.path.isfile(PIDFILE):
-        message = "TopPatch Agent is not running. Stopping Failed...\n"
-        sys.stderr.write(message)
+    if not os.path.isfile(settings.AGENT_PID):
+        message = "%s is not running. Stopping Failed...\n"
+        sys.stderr.write(message % (settings.AGENT_PRODUCT))
         sys.exit(1)
     else:
-        print 'TopPatch Agent is going to stop now....'
-        pf = file(PIDFILE, 'r')
+        print '%s is going to stop now....' % (settings.AGENT_PRODUCT)
+        pf = file(settings.AGENT_PID, 'r')
         pids = (pf.read().strip()[1:-1])
         pid_no = pids.split(', ')
         pf.close()
         os.kill(int(pid_no[0]), signal.SIGTERM)
-	os.remove(PIDFILE)
+      	os.remove(settings.AGENT_PID)
         time.sleep(2)
-        print 'TopPatch Agent has been stopped now !!!'
+        print '%s has been stopped now !!!' % (settings.AGENT_PRODUCT)
 
 def TopPatchAgent_restart():
     TopPatchAgent_stop()
-    print "\n"	
+    print "\n"
     TopPatchAgent_start()
 
 def TopPatchAgent_status():
-    if os.path.isfile(PIDFILE):
-        message = "TopPatch Agent is running and the PIDFILE is: '%s'\n"
-        sys.stderr.write(message % PIDFILE)
-        logger.info(message % PIDFILE)
+    if os.path.isfile(settings.AGENT_PID):
+        message = "%s is running and the PIDFILE is: '%s'\n"
+        sys.stderr.write(message % (settings.AGENT_PRODUCT, settings.AGENT_PID))
+        logger.info(message % (settings.AGENT_PRODUCT, settings.AGENT_PID))
         sys.exit(1)
     else:
         print "TopPatch Agent is not running."
@@ -101,7 +98,7 @@ if __name__ == "__main__":
         elif ACTIONS == 'status':
             TopPatchAgent_status()
         else:
-            print "Unknown command"
+            print "Unknown command: %s" % (ACTIONS)
             sys.exit(2)
         sys.exit(0)
     else:

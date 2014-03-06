@@ -4,11 +4,11 @@
 # as it does use of the /proc filesystem.
 
 REDISPORT=6379
-EXEC=/opt/TopPatch/bin/redis-server
-CLIEXEC=/opt/TopPatch/bin/redis-cli
+EXEC=redis-server
+CLIEXEC=redis-cli
 
-PIDFILE=/opt/TopPatch/var/tmp/redis-6379.pid
-CONF="/opt/TopPatch/conf/redis.conf"
+PIDFILE=/run/redis-6379.pid
+CONF="/etc/vFense/redis.conf"
 
 case "$1" in
     start)

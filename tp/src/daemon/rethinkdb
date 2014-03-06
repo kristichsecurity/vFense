@@ -19,8 +19,8 @@ set -e -u
 itask="${1:-}"
 
 rtdbbin=/opt/TopPatch/bin/rethinkdb ;
-rtdbconfigdir=/opt/TopPatch/var/rethinkdb ;
-rtdbwebdir=/opt/TopPatch/rethinkdb/current/web ;
+rtdbconfigdir=/etc/rethinkdb/instances.d;
+rtdbwebdir=/usr/share/rethinkdb/web;
 
 # parse a line from the config file
 conf_read_line () {

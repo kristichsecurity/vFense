@@ -3,7 +3,7 @@
 PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 NAME=vFense
 DESC=vFense
-DAEMON="/opt/TopPatch/tp/src/daemon/vFensed"
+DAEMON="/usr/local/bin/vFensed"
 
 set -e
 
@@ -13,7 +13,7 @@ case "$1" in
         ;;
   stop)
 	sh -c "$DAEMON $1"
-	;;	
+	;;
   restart)
 	sh -c "$DAEMON $1"
 	;;

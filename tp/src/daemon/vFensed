@@ -59,18 +59,10 @@ for port in RVW_PORTS:
     ALLSERVICES.append((RVWEB, pid_file, rvw, port))
 
 ##################################################################
-PROGRAM = 'python'
-PIDFILE = os.path.join(settings.ROOT_RUN, 'vfense.pid')
-RVSCHEDULER_PIDFILE = os.path.join(settings.ROOT_RUN, 'rvscheduler-9002.pid')
+PIDS.append((settings.RVSCHEDULER_PIDFILE, 'RvScheduler'))
 
-RECEIVER_DIR = '/opt/TopPatch/tp/src/receiver'
-PATH = '/opt/TopPatch/tp/'
-RVSCHEDULER='src/scheduler/rvscheduler.py'
-
-PIDS.append((RVSCHEDULER_PIDFILE, 'RvScheduler'))
-
-SERVICES.append((RVSCHEDULER, RVSCHEDULER_PIDFILE, 'RvScheduler'))
-ALLSERVICES.append((RVSCHEDULER, RVSCHEDULER_PIDFILE, 'RvScheduler'))
+SERVICES.append((settings.RVSCHEDULER, settings.RVSCHEDULER_PIDFILE, 'RvScheduler'))
+ALLSERVICES.append((settings.RVSCHEDULER, settings.RVSCHEDULER_PIDFILE, 'RvScheduler'))
 
 def run(program, *args):
     try:
@@ -89,7 +81,7 @@ def run(program, *args):
 def rqworker_starter():
     completed = True
     for queue in RQ_WORKER_QUEUES:
-        os.chdir(RECEIVER_DIR)
+        os.chdir(settings.RECEIVER_DIR)
         pid_file = os.path.join(settings.ROOT_RUN, 'RQW_PID_%s.pid' % (queue))
         rqw_settings = 'rqworker_%s_settings' % (queue)
         rqw = 'RqWorker Queue %s' % (queue)
@@ -102,7 +94,7 @@ def rqworker_starter():
         )
         rqworker_start.poll()
         rq_pid = str(rqworker_start.pid)
-        os.chdir(PATH)
+        # os.chdir(PATH)
         if rq_pid:
             pid = open(pid_file, 'w')
             pid.write(rq_pid)
@@ -174,25 +166,24 @@ def TopPatch_start():
                         logger.error(message)
                         sys.exit(1)
     if process_exists == 0:
-        os.chdir(PATH)
         print 'patching Server is starting. Please wait....'
         logger.info('patching Server is starting. Please wait....')
         rqworker = rqworker_starter()
         if rqworker:
             for service in RVLSERVICES:
-                pid = run(PROGRAM, service[0], '--port=%s' % (service[3]))
+                pid = run(settings.PROGRAM, service[0], '--port=%s' % (service[3]))
                 pidfile = open(service[1], 'w')
                 pidfile.write(pid)
                 pidfile.close()
                 logger.info("%s Server Started" % (service[2]))
             for service in RVWSERVICES:
-                pid = run(PROGRAM, service[0], '--port=%s' % (service[3]))
+                pid = run(settings.PROGRAM, service[0], '--port=%s' % (service[3]))
                 pidfile = open(service[1], 'w')
                 pidfile.write(pid)
                 pidfile.close()
                 logger.info("%s Server Started" % (service[2]))
             for service in SERVICES:
-                pid = run(PROGRAM, service[0])
+                pid = run(settings.PROGRAM, service[0])
                 pidfile = open(service[1], 'w')
                 pidfile.write(pid)
                 pidfile.close()
