@@ -8,7 +8,10 @@ from vFense.plugins.patching import *
 from vFense.plugins.patching.rv_db_calls import get_all_app_stats_by_agentid
 from vFense.errorz.error_messages import GenericResults
 
-logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
+import os
+import settings
+
+logging.config.fileConfig(os.path.join(ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvapi')
 
 

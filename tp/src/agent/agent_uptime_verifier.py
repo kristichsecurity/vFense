@@ -5,7 +5,10 @@ from datetime import datetime
 from vFense.agent import *
 from vFense.db.client import r , db_connect
 
-logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
+import os
+import settings
+
+logging.config.fileConfig(os.path.join(ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('agentstatus')
 
 def all_agent_status():

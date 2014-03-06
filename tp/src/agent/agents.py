@@ -11,11 +11,11 @@ from vFense.server.hierarchy import Collection, api
 import redis
 from rq import Queue
 
-rq_host = 'localhost'
-rq_port = 6379
-rq_db = 0
-rq_pool = redis.StrictRedis(host=rq_host, port=rq_port, db=rq_db)
-logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
+import os
+import settings
+
+rq_pool = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
+logging.config.fileConfig(os.path.join(ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvapi')
 
 
