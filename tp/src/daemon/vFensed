@@ -14,7 +14,7 @@ from vFense.db.client import db_connect
 logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
 logger = logging.getLogger('rvapi')
 
-PID_DIR = '/opt/TopPatch/var/tmp/'
+PID_DIR = '/opt/TopPatch/var/run/'
 PIDS =[]
 SERVICES =[]
 ALLSERVICES =[]
@@ -60,8 +60,8 @@ for port in RVW_PORTS:
 ##################################################################
 TOPPATCH_HOME = '/opt/TopPatch/'
 PROGRAM = 'python'
-PIDFILE = '/opt/TopPatch/var/tmp/process.pid'
-RVSCHEDULER_PIDFILE='/opt/TopPatch/var/tmp/rvscheduler-9002.pid'
+PIDFILE = '/opt/TopPatch/var/run/process.pid'
+RVSCHEDULER_PIDFILE='/opt/TopPatch/var/run/rvscheduler-9002.pid'
 
 RECEIVER_DIR = '/opt/TopPatch/tp/src/receiver'
 PATH = '/opt/TopPatch/tp/'
@@ -71,6 +71,8 @@ PIDS.append((RVSCHEDULER_PIDFILE, 'RvScheduler'))
 
 if not os.path.exists('/opt/TopPatch/var/tmp/'):
     os.mkdir('/opt/TopPatch/var/tmp/')
+if not os.path.exists('/opt/TopPatch/var/run/'):
+    os.mkdir('/opt/TopPatch/var/run/')
 if not os.path.exists('/opt/TopPatch/var/log/'):
     os.mkdir('/opt/TopPatch/var/log/')
 
