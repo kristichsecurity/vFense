@@ -108,7 +108,7 @@ def initialize_db():
 
         subprocess.Popen(
             [
-                'chown', '-R', 'rethinkdb.rethinkdb', settings.RETHINK_VFENSE_ROOT
+                'chown', '-R', '%s.%s' % (settings.RETHINK_USER, settings.RETHINK_GROUP), settings.RETHINK_VFENSE_ROOT
             ],
         )
     if os.path.exists(settings.NGINX_CONFIG) and not os.path.exists(settings.NGINX_CONFIG_ENABLED):
@@ -121,29 +121,29 @@ def initialize_db():
         )
     if not os.path.exists(settings.ROOT_LOG):
         os.mkdir(settings.ROOT_LOG)
-    if not os.path.exists('/opt/TopPatch/var/scheduler'):
-        os.mkdir('/opt/TopPatch/var/scheduler')
-    if not os.path.exists('/opt/TopPatch/var/packages'):
-        os.mkdir('/opt/TopPatch/var/packages')
-    if not os.path.exists('/opt/TopPatch/var/packages/tmp'):
-        os.mkdir('/opt/TopPatch/var/packages/tmp', 0773)
-    if not os.path.exists('/opt/TopPatch/tp/src/plugins/cve/data/xls'):
-        os.makedirs('/opt/TopPatch/tp/src/plugins/cve/data/xls', 0773)
-    if not os.path.exists('/opt/TopPatch/tp/src/plugins/cve/data/xml'):
-        os.mkdir('/opt/TopPatch/tp/src/plugins/cve/data/xml', 0773)
-    if not os.path.exists('/opt/TopPatch/tp/src/plugins/cve/data/html/ubuntu'):
-        os.makedirs('/opt/TopPatch/tp/src/plugins/cve/data/html/ubuntu', 0773)
-    if not os.path.exists('/etc/init.d/vFense'):
+    if not os.path.exists(settings.ROOT_ETC_SCHED):
+        os.mkdir(settings.ROOT_ETC_SCHED)
+    if not os.path.exists(settings.ROOT_PKG_CACHE):
+        os.mkdir(settings.ROOT_PKG_CACHE)
+    if not os.path.exists(settings.ROOT_TMP_PKG):
+        os.mkdir(settings.ROOT_TMP_PKG, 0773)
+    if not os.path.exists(settings.ROOT_PLUGINS_CVE_XLS):
+        os.makedirs(settings.ROOT_PLUGINS_CVE_XLS, 0773)
+    if not os.path.exists(settings.ROOT_PLUGINS_CVE_XML):
+        os.mkdir(settings.ROOT_PLUGINS_CVE_XML, 0773)
+    if not os.path.exists(settings.ROOT_PLUGINS_CVE_UBUNTU):
+        os.makedirs(settings.ROOT_PLUGINS_CVE_UBUNTU, 0773)
+    if not os.path.exists(settings.INIT_SCRIPT_DST):
         subprocess.Popen(
             [
                 'ln', '-s',
-                '/opt/TopPatch/tp/src/daemon/vFense',
-                '/etc/init.d/vFense'
+                settings.INIT_SCRIPT_SRC,
+                settings.INIT_SCRIPT_DST
             ],
         )
         subprocess.Popen(
             [
-                'update-rc.d', 'vFense',
+                'update-rc.d', settings.PRODUCT,
                 'defaults'
             ],
         )
@@ -161,7 +161,7 @@ def initialize_db():
     except Exception as e:
         subprocess.Popen(
             [
-                'adduser', '--disabled-password', '--gecos', 'GECOS','toppatch',
+                'adduser', '--disabled-password', '--gecos', 'GECOS', settings.RUNASUSER,
             ],
         )
 
@@ -172,8 +172,8 @@ def initialize_db():
     completed = True
     if completed:
         conn = db_connect()
-        r.db_create('toppatch_server').run(conn)
-        db = r.db('toppatch_server')
+        r.db_create(settings.RETHINK_DB_SERVER).run(conn)
+        db = r.db(settings.RETHINK_DB_SERVER)
         conn.close()
         ci.initialize_indexes_and_create_tables()
         conn = db_connect()
@@ -274,14 +274,15 @@ if __name__ == '__main__':
         print 'vFense environment has been succesfully initialized\n'
         subprocess.Popen(
             [
-                'chown', '-R', 'toppatch.toppatch',
+                'chown', '-R', '%s.%s' % (settings.RUNASUSER, settings.RUNASUSER),
                 settings.ROOT_LOG,
                 settings.ROOT_ETC,
                 settings.ROOT_TMP,
                 settings.ROOT_SRC,
                 settings.ROOT_RUN,
                 settings.ROOT_LIB,
-                settings.ROOT_BIN
+                settings.ROOT_BIN,
+                settings.ROOT_PKG_CACHE
             ],
         )
 
