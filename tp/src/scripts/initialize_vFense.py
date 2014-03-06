@@ -27,17 +27,29 @@ from vFense.plugins.cve.cve_parser import load_up_all_xml_into_db
 from vFense.plugins.cve.bulletin_parser import parse_bulletin_and_updatedb
 from vFense.plugins.cve.get_all_ubuntu_usns import begin_usn_home_page_processing
 
-logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
+gettext = lambda s: s
+
+ROOT = '/usr/local'
+ROOT_ETC = os.path.join(ROOT, 'etc/vfense')
+ROOT_BIN = os.path.join(ROOT, 'bin/vfense')
+ROOT_LIB = os.path.join(ROOT, 'lib/vfense')
+ROOT_RUN = '/run/vfense'
+ROOT_LOG = '/var/log/vfense'
+
+logging.config.fileConfig(os.path.join(ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvapi')
+
 RETHINK_PATH = '/usr/share/rethinkdb'
 RETHINK_USER = 'rethinkdb'
 RETHINK_INSTANCES_PATH = '/etc/rethinkdb/instances.d'
 RETHINK_DATA_PATH = '/var/lib/rethinkdb/vFense/data'
-RETHINK_SOURCE_CONF = '/opt/TopPatch/conf/rethinkdb_vFense.conf'
+RETHINK_SOURCE_CONF = os.path.join(ROOT_ETC, 'rethinkdb_vFense.conf')
 RETHINK_CONF = '/etc/rethinkdb/instances.d/vFense.conf'
 RETHINK_WEB = '/usr/share/rethinkdb/web'
 RETHINK_PID_FILE = '/var/run/rethinkdb/vFense/pid_file'
+
 TOPPATCH_HOME = '/opt/TopPatch/'
+
 NGINX_CONFIG = '/etc/nginx/sites-available/vFense.conf'
 NGINX_CONFIG_ENABLED = '/etc/nginx/sites-enabled/vFense.conf'
 
