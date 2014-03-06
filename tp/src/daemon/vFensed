@@ -277,7 +277,7 @@ if __name__ == "__main__":
         elif ACTIONS == 'status':
             TopPatch_status()
         else:
-            print "Unknown command"
+            print "Unknown command: %s" % (ACTIONS)
             sys.exit(2)
         sys.exit(0)
     else:
