@@ -12,9 +12,11 @@ from emailer.mailer import MailClient
 
 from tornado.template import Loader
 
-logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
+import os
+import settings
+
+logging.config.fileConfig(os.path.join(settings.ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvnotifications')
-TEMPLATE_DIR = ('/opt/TopPatch/tp/src/emailer/templates')
 
 def send_data(customer_name, subject, msg_body, sender_addresses, html=True):
     try:
@@ -38,7 +40,7 @@ def send_data(customer_name, subject, msg_body, sender_addresses, html=True):
 
 def parse_install_operation_data(oper_data, oper_type, oper_plugin, threshold):
     try:
-        loader = Loader(TEMPLATE_DIR)
+        loader = Loader(settings.EMAIL_TEMPLATES)
         subject = 'TopPatch Alert'
         if oper_plugin == RV_PLUGIN:
             if oper_type == INSTALL or oper_type == UNINSTALL:

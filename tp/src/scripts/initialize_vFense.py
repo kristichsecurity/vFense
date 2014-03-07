@@ -9,7 +9,6 @@ import subprocess
 from time import sleep
 import logging, logging.config
 
-import settings
 
 import create_indexes as ci
 import nginx_config_creator as ncc
@@ -28,6 +27,7 @@ from vFense.plugins import cve
 from vFense.plugins.cve.cve_parser import load_up_all_xml_into_db
 from vFense.plugins.cve.bulletin_parser import parse_bulletin_and_updatedb
 from vFense.plugins.cve.get_all_ubuntu_usns import begin_usn_home_page_processing
+import vFense.settings.settings
 
 logging.config.fileConfig(os.path.join(settings.ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvapi')
@@ -119,20 +119,6 @@ def initialize_db():
                 settings.NGINX_CONFIG_ENABLED
             ],
         )
-    if not os.path.exists(settings.ROOT_LOG):
-        os.mkdir(settings.ROOT_LOG)
-    if not os.path.exists(settings.ROOT_ETC_SCHED):
-        os.mkdir(settings.ROOT_ETC_SCHED)
-    if not os.path.exists(settings.ROOT_PKG_CACHE):
-        os.mkdir(settings.ROOT_PKG_CACHE)
-    if not os.path.exists(settings.ROOT_TMP_PKG):
-        os.mkdir(settings.ROOT_TMP_PKG, 0773)
-    if not os.path.exists(settings.ROOT_PLUGINS_CVE_XLS):
-        os.makedirs(settings.ROOT_PLUGINS_CVE_XLS, 0773)
-    if not os.path.exists(settings.ROOT_PLUGINS_CVE_XML):
-        os.mkdir(settings.ROOT_PLUGINS_CVE_XML, 0773)
-    if not os.path.exists(settings.ROOT_PLUGINS_CVE_UBUNTU):
-        os.makedirs(settings.ROOT_PLUGINS_CVE_UBUNTU, 0773)
     if not os.path.exists(settings.INIT_SCRIPT_DST):
         subprocess.Popen(
             [

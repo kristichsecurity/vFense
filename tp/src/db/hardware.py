@@ -4,7 +4,10 @@ from hashlib import sha256
 from vFense.db.client import db_create_close, r
 from vFense.server.hierarchy import api
 
-logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
+import os
+import settings
+
+logging.config.fileConfig(os.path.join(settings.ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvapi')
 
 

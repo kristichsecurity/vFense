@@ -6,13 +6,14 @@ import types
 import rethinkdb as r
 import redis
 
-logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
+import settings
+
+logging.config.fileConfig(os.path.join(settings.ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvapi')
 
-pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
-db_config='/opt/TopPatch/conf/database.conf'
+pool = redis.ConnectionPool(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
 Config = ConfigParser.ConfigParser()
-Config.read(db_config)
+Config.read(settings.DB_CONFIG_FILE)
 
 def db_connect(new_db_config=None):
     conn = None

@@ -6,7 +6,10 @@ from vFense.operations import *
 from vFense.notifications import *
 from vFense.server.hierarchy import Collection, GroupKey, UserKey, CustomerKey
 
-logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
+import os
+import settings
+
+logging.config.fileConfig(os.path.join(settings.ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvapi')
 
 

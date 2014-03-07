@@ -2,7 +2,10 @@ import logging
 import logging.config
 from vFense.db.client import db_create_close, r
 
-logging.config.fileConfig('/opt/TopPatch/conf/logging.config')
+import os
+import settings
+
+logging.config.fileConfig(os.path.join(settings.ROOT_ETC, 'logging.config'))
 logger = logging.getLogger('rvnotifications')
 
 class MonitoringNotificationHandler():

@@ -24,6 +24,9 @@ ROOT_PLUGINS = os.path.join(ROOT_SRC, 'plugins')
 RECEIVER_DIR = os.path.join(ROOT_SRC, 'receiver')
 RVSCHEDULER = os.path.join(ROOT_SRC, 'scheduler/rvscheduler.py')
 
+DB_CONFIG_FILE = os.path.join(ROOT_ETC, 'database.conf')
+EMAIL_TEMPLATES = os.path.join(ROOT_ETC, 'emailer/templates')
+
 
 ###########################################
 # PIDs
